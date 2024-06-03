@@ -1,3 +1,5 @@
+### WHEN DID THE CALCULATION, I did R^. And then you will see the Mean of Y
+
 ```{r}
 rm(list = ls()); gc()
 library(ISLR2)
