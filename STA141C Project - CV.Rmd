@@ -1,0 +1,111 @@
+---
+title: "Porject - CV"
+author: "Karen Nguyen"
+date: "2024-05-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+# import libraries
+library('dplyr')
+library('ggplot2')
+library(boot)
+library(leaps)
+# import data
+data <- read.csv('taylor_swift_spotify.csv')
+# save only the possible predictors into the data
+data <- data[, c("acousticness", "danceability", "energy",	"liveness", "loudness", "speechiness", "tempo", "valence", "popularity", "duration_ms")]
+```
+
+For ease of interpretation, we will multiply the predictors that are scaled from 0 to 1 -- acousticness, danceability, energy, loudness -- by 100 so that they are scaled from 0 to 100. 
+```{r}
+data[1:4] = lapply(data[1:4], "*", 100)
+data[6] = lapply(data[6], "*", 100)
+data[8] = lapply(data[8], "*", 100)
+```
+Also for ease of interpretation, convert duration in ms to seconds by dividing by 900
+```{r}
+data[10] = lapply(data[10], "/", 1000)
+data = rename(data, duration_s = duration_ms)
+```
+
+Cross-validation, specifically K-fold cross-validation, is commonly used for estimating test error and to choose the best final model.
+
+# k-fold CV (10 fold)
+```{r}
+# predict function for regsubsets from class
+predict.regsubsets <- function(object, newdata, id, ...) {
+  form <- as.formula(object$call[[2]])
+  mat <- model.matrix(form, newdata)
+  coefi <- coef(object, id = id)
+  xvars <- names(coefi)
+  mat[, xvars] %*% coefi
+}
+```
+
+```{r}
+k <- 10
+n <- nrow(data)
+set.seed(1)
+folds <- sample(rep(1:k, length = n))
+cv.errors <- matrix(NA, k, 9,
+    dimnames = list(NULL, paste(1:9))) # each row is one fold, columns are models with different number of variables
+###
+for (tmpFold in 1:k) {
+  best.fit <- leaps::regsubsets(popularity ~ .,
+       data = data[folds != tmpFold, ],
+       nvmax = 9)
+  for (i in 1:9) {
+    pred <- predict(best.fit, data[folds == tmpFold, ], id = i) # will datamatically use predict.regsubsets()
+    # for more see https://stats.stackexchange.com/a/188015
+    cv.errors[tmpFold, i] <-
+         mean((data$popularity[folds == tmpFold] - pred)^2)
+   }
+ }
+###
+mean.cv.errors <- apply(cv.errors, 2, mean)
+mean.cv.errors
+par(mfrow = c(1, 1))
+plot(mean.cv.errors, type = "b", xlab = "Cross-Validation Mean Errors", ylab = "Number of Variables") # CV selects 5-variable model
+###
+# refit on full data 
+reg.best <- leaps::regsubsets(popularity ~ ., data = data,
+    nvmax = 9)
+coef(reg.best, 5)
+```
+
+5 variable model
+
+(Intercept)      energy    liveness    loudness     valence 
+51.71103667  0.15380132 -0.18284103 -1.78591950 -0.10302811 
+ duration_s 
+-0.02779766 
+
+Popularity ~ energy + liveness + loudness + valence + duration_s
+
+```{r}
+mean.cv.errors
+```
+
+
+# Leave-One-Out CV (LOOCV)
+```{r}
+cv.error <- rep(0, 2)
+# for the k-fold CV selected model
+glm.fit1 <- glm(popularity ~ energy + liveness + loudness + valence +
+                 duration_s, data = data)
+cv.error[1] <- cv.glm(data, glm.fit1)$delta[1]
+
+# for the linear regression selected model
+glm.fit2 <- glm(popularity ~ energy + liveness + loudness + valence,
+                data = data)
+cv.error[2] <- cv.glm(data, glm.fit2)$delta[1]
+
+cv.error
+```
+LOOCV prefers the 5 variable model over the 4 variable model as well but the difference is minor.
+CV error 249.6204 < 249.9105
+
