@@ -1,0 +1,241 @@
+---
+title: "Project"
+author: "Tracey Tran"
+date: "2024-05-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r}
+# data processing
+df <- read.csv("taylor_swift_spotify.csv", header = TRUE, stringsAsFactors=FALSE)
+df = df[, c(-1, -2, -3, -4, -5, -6, -7, -11)]
+df$acousticness = df$acousticness * 100
+df$danceability = df$danceability * 100
+df$energy = df$energy * 100
+df$liveness = df$liveness * 100
+df$speechiness = df$speechiness * 100
+df$valence = df$valence * 100
+df$duration_ms = df$duration_ms / 1000
+```
+
+```{r}
+# forward stepwise selection
+base_model = lm(popularity ~ 1, data = df)
+summary(base_model)
+```
+
+```{r}
+one_model_1 = lm(popularity ~ acousticness, data = df)
+summary(one_model_1)
+```
+
+```{r}
+one_model_2 = lm(popularity ~ danceability, data = df)
+summary(one_model_2)
+```
+
+```{r}
+one_model_3 = lm(popularity ~ energy, data = df)
+summary(one_model_3)
+```
+
+```{r}
+one_model_4 = lm(popularity ~ liveness, data = df)
+summary(one_model_4)
+```
+
+```{r}
+one_model_5 = lm(popularity ~ loudness, data = df)
+summary(one_model_5)
+```
+
+```{r}
+one_model_6 = lm(popularity ~ speechiness, data = df)
+summary(one_model_6)
+```
+
+```{r}
+one_model_7 = lm(popularity ~ tempo, data = df)
+summary(one_model_7)
+```
+
+```{r}
+one_model_8 = lm(popularity ~ valence, data = df)
+summary(one_model_8)
+```
+
+```{r}
+one_model_9 = lm(popularity ~ duration_ms, data = df)
+summary(one_model_9)
+```
+
+```{r}
+two_model_1 = lm(popularity ~ loudness + acousticness, data = df)
+summary(two_model_1)
+```
+
+```{r}
+two_model_2 = lm(popularity ~ loudness + danceability, data = df)
+summary(two_model_2)
+```
+
+```{r}
+two_model_3 = lm(popularity ~ loudness + energy, data = df)
+summary(two_model_3)
+```
+
+```{r}
+two_model_4 = lm(popularity ~ loudness + liveness, data = df)
+summary(two_model_4)
+```
+
+```{r}
+two_model_5 = lm(popularity ~ loudness + speechiness, data = df)
+summary(two_model_5)
+```
+
+```{r}
+two_model_6 = lm(popularity ~ loudness + tempo, data = df)
+summary(two_model_6)
+```
+
+```{r}
+two_model_7= lm(popularity ~ loudness + valence, data = df)
+summary(two_model_7)
+```
+
+```{r}
+two_model_8 = lm(popularity ~ loudness + duration_ms, data = df)
+summary(two_model_8)
+```
+
+```{r}
+three_model_1 = lm(popularity ~ loudness + liveness + acousticness, data = df)
+summary(three_model_1)
+```
+
+```{r}
+three_model_2 = lm(popularity ~ loudness + liveness + danceability, data = df)
+summary(three_model_2)
+```
+
+```{r}
+three_model_3 = lm(popularity ~ loudness + liveness + energy, data = df)
+summary(three_model_3)
+```
+
+```{r}
+three_model_4 = lm(popularity ~ loudness + liveness + speechiness, data = df)
+summary(three_model_4)
+```
+
+```{r}
+three_model_5 = lm(popularity ~ loudness + liveness + tempo, data = df)
+summary(three_model_5)
+```
+
+```{r}
+three_model_6 = lm(popularity ~ loudness + liveness + valence, data = df)
+summary(three_model_6)
+```
+
+```{r}
+three_model_7 = lm(popularity ~ loudness + liveness + duration_ms, data = df)
+summary(three_model_7)
+```
+
+```{r}
+four_model_1 = lm(popularity ~ loudness + liveness + energy + acousticness, data = df)
+summary(four_model_1)
+```
+
+```{r}
+four_model_2 = lm(popularity ~ loudness + liveness + energy + danceability, data = df)
+summary(four_model_2)
+```
+
+```{r}
+four_model_3 = lm(popularity ~ loudness + liveness + energy + speechiness, data = df)
+summary(four_model_3)
+```
+
+```{r}
+four_model_4 = lm(popularity ~ loudness + liveness + energy + tempo, data = df)
+summary(four_model_4)
+```
+
+```{r}
+# final model
+four_model_5 = lm(popularity ~ loudness + liveness + energy + valence, data = df)
+summary(four_model_5)
+```
+
+```{r}
+four_model_6 = lm(popularity ~ loudness + liveness + energy + duration_ms, data = df)
+summary(four_model_6)
+```
+
+```{r}
+five_model_1 = lm(popularity ~ loudness + liveness + energy + valence + acousticness, data = df)
+summary(five_model_1)
+```
+
+```{r}
+five_model_2 = lm(popularity ~ loudness + liveness + energy + valence + danceability, data = df)
+summary(five_model_2)
+```
+
+```{r}
+five_model_3 = lm(popularity ~ loudness + liveness + energy + valence + speechiness, data = df)
+summary(five_model_3)
+```
+
+```{r}
+five_model_4 = lm(popularity ~ loudness + liveness + energy + valence + tempo, data = df)
+summary(five_model_4)
+```
+
+```{r}
+five_model_5 = lm(popularity ~ loudness + liveness + energy + valence + duration_ms, data = df)
+summary(five_model_5)
+```
+
+```{r}
+par(mfrow = c(2,2))
+plot(four_model_5)
+```
+
+```{r}
+# testing for interaction effects
+interaction12_model = lm(popularity ~ loudness + liveness + energy + valence + loudness*liveness, data = df)
+summary(interaction12_model)
+```
+
+```{r}
+interaction13_model = lm(popularity ~ loudness + liveness + energy + valence + loudness*energy, data = df)
+summary(interaction13_model)
+```
+
+```{r}
+interaction14_model = lm(popularity ~ loudness + liveness + energy + valence + loudness*valence, data = df)
+summary(interaction14_model)
+```
+
+```{r}
+interaction23_model = lm(popularity ~ loudness + liveness + energy + valence + liveness*energy, data = df)
+summary(interaction13_model)
+```
+
+```{r}
+interaction24_model = lm(popularity ~ loudness + liveness + energy + valence + liveness*valence, data = df)
+summary(interaction13_model)
+```
+
+```{r}
+interaction34_model = lm(popularity ~ loudness + liveness + energy + valence + energy*valence, data = df)
+summary(interaction13_model)
+```
