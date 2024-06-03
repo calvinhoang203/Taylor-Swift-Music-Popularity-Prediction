@@ -38,7 +38,7 @@ TW_data$duration_ms = TW_data$duration_ms * 100
 
 
 ```{r}
-set.seed(1)
+set.seed(3)
 
 rsq_function <- function(data, indices, formula) {
   d <- data[indices, ]
@@ -88,7 +88,7 @@ boot_predicted_means <- boot(data = TW_data, statistic = boot.fn_model_pred_mean
 
 ```{r}
 
-set.seed(3)
+set.seed(123)
 
 
 mean_function <- function(data, index, formula) {
